@@ -146,24 +146,31 @@ See the source file for author and licensing information.
 %
 % \medskip
 %
-% First, the exact syntax of |\directlua| has changed along version of Lua\TeX, so
-% this package provides a |\luadirect| command which is an exact synonym of
-% |\directlua| except that it doesn't have the funny, changing parts of its
-% syntax.\footnote{And also, it expands in two steps instead of one. If you
-% don't known what it means, then you probably don't need to.}
+% First, the exact syntax of |\directlua| has changed along version of
+% Lua\TeX, so this package provides a |\luadirect| command which is an exact
+% synonym of |\directlua| except that it doesn't have the funny, changing
+% parts of its syntax.\footnote{And also, it expands in two steps instead of
+% one. If you don't known what it means, then you probably don't need to.}
+%
+% The problems with |\directlua| (or |\luadirect|) are mainly with \TeX\
+% special characters. Actually, things are not that bad, since most special
+% characters do work, namely: |_|, |^|, |&|, \verb+$+, |{|, |}|. Three are a
+% bit tricky but they can be managed with |\string|: |\| and |~|. Only |%| is
+% really hard to obtain. Also, \TeX\ macros are expanded, which is good since
+% it allows to pass information from \TeX\ to Lua, but you must be carefull
+% and use only purely expandable macros.
 %
 % The |\luaexec| command is similar to |\luadirect| but with a few additional
 % features:\footnote{And one major drawback: it is not purely expandable. See
-% above.} |\\| gives a double blackslash (convenient in Lua strings) and |\%|
-% a percent character. If you happen to need a single backslash, you can still
-% use a constructs like |\string\n| just as with |\luadirect|. Also, \TeX\
-% macros are expanded normally, allowing to easily pass information from \TeX\
-% to Lua.
+% above.} |\\| gives a double blackslash (convenient in Lua strings),  |\%| a
+% percent character, and |~| just works. If you happen to need a single
+% backslash, you can still use a construct like |\string\n| just as with
+% |\luadirect|. Also, \TeX\ macros are expanded.
 %
 % The |luacode| environment is similar, except that you can use |%| and other
 % special characters directly (but |\%| also works). Only the backslash and
 % the braces keep their special meaning, so that macros still work as usual,
-% but you still need to use a |\string| trick to get a single backslash.
+% and you still need to use a |\string| trick to get a single backslash.
 %
 % A variant |luacode*| goes further and makes even backslash a normal
 % character, so that you don't need any trick to obtain a single backslash. On
@@ -181,6 +188,8 @@ See the source file for author and licensing information.
 %     Macros              & Yes             & Yes             & Yes             & No           \\
 %     Single backslash    & Using |\string| & Using |\string| & Using |\string| & Just |\|     \\
 %     Double backslash    & |\string\\|     & |\\|            & |\\|            & |\\|         \\
+%     Tilde               & |\string~|      & |~|             & |~|             & |~|          \\
+%     Sharp               & |\string#|      & |\#|            & |\#| or |#|     & |#|          \\
 %     Percent             & No easy way     & |\%|            & |\%| or |%|     & |%|          \\
 %     \TeX\ line comments & Yes             & Yes             & No              & No           \\
 %     Lua line comments   & No              & No              & Yes             & Yes          \\
@@ -272,27 +281,33 @@ See the source file for author and licensing information.
 %
 %    \subsection{Internal code}
 %
-%    Execute a piece of code, with shortcuts for backslash and percent, and
-%    trying to preserve newlines. This internal macro is long so that we can
-%    use in the environment, while the corresponding user command will be
-%    short.
+%    Execute a piece of code, with shortcuts for double-backslash, percent and
+%    tilde, and trying to preserve newlines. This internal macro is long so
+%    that we can use in the environment, while the corresponding user command
+%    will be short. Make sure |~| is active.
 %
 %    \begin{macrocode}
-\newcommand*\luacode@execute [1] {%
-  \begingroup
-  \escapechar92
-  \newlinechar10
-  \edef\\{\string\\}%
-  \let\%=\luacode@percentchar
-  \expandafter\expandafter\expandafter\endgroup
-  \luatexbase@directlua{#1}}
+\begingroup \catcode`\~\active \expandafter\endgroup
+\@firstofone{%
+  \newcommand*\luacode@execute [1] {%
+    \begingroup
+    \escapechar92
+    \newlinechar10
+    \edef\\{\string\\}%
+    \edef~{\string~}%
+    \let\%=\luacode@percentchar
+    \let\#=\luacode@sharpchar
+    \expandafter\expandafter\expandafter\endgroup
+    \luatexbase@directlua{#1}}
+}
 %    \end{macrocode}
 %
-%    A catcode 12 percent char for use in the previous command.
+%    Catcode 12 percent and sharp characters for use in the previous command.
 %
 %    \begin{macrocode}
 \begingroup \escapechar\m@ne \edef\aux{\endgroup
   \unexpanded{\newcommand\luacode@percentchar}{\string\%}%
+  \unexpanded{\newcommand\luacode@sharpchar  }{\string\#}%
 }\aux
 %    \end{macrocode}
 %
@@ -439,35 +454,48 @@ See the source file for author and licensing information.
 
 \newcommand\foo{3}
 
-\( \luadirect{
-  local foo_bar = "A full line.\string\n"
-  tex.sprint("\string\\pi \string\\neq", tostring(math.pi))
-  % a tex comment: no easy way to get a % character above
-  tex.sprint("-", math.sqrt(\foo))
-} \)
+\(
+  \luadirect{
+    texio.write_nl("Special chars: _ ^ & $ { } working.\string\n"
+    .. "Backslashes need a bit of care.\string\n"
+    .. "Sharps and tildes too: # doubled, but \string# and \string~")
+    % a tex comment: no easy way to get a %
+    tex.sprint("\string\\pi \string\\neq", tostring(math.pi))
+    % we can use TeX macros
+    tex.sprint("-", math.sqrt(\foo))
+  }
+\)
 
 
-\( \luaexec{
-  local foo_bar = "A full line.\string\n"
-  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('\%.', '+'))
-  % a tex comment
-  tex.sprint("-", math.sqrt(\foo))
-} \)
+\(
+  \luaexec{
+    texio.write_nl("Special chars: _ ^ & $ { } ~ working.\string\n"
+    .. "Backslashes still need a bit of care.\string\n"
+    .. "Single sharps are easier now: \#")
+    % a tex comment: we also get a % below
+    tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('\%.', '+'))
+    % we can use TeX macros
+    tex.sprint("-", math.sqrt(\foo))
+  }
+\)
 
 \[
   \begin{luacode}
-    local foo = "A full line.\string\n"
+    texio.write_nl("Special chars: _ ^ & $ { } ~ # % working.\string\n"
+    .. "Only backslashes still need a bit of care.\string\n")
+    -- a lua comment: we could use \% below, too
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-    -- a lua comment: we could have used \% above, too
+    -- we can use TeX macros
     tex.sprint("-", math.sqrt(\foo))
   \end{luacode}
 \]
 
 \[
   \begin{luacode*}
-    local foo_bar = "A full line.\n"
+    texio.write_nl("Special chars: _ ^ & $ { } ~ # % \\ working.\n")
+    -- a lua comment: the backlash is doubled as in normal Lua code
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-    -- a lua comment: no way to use a TeX variable here
+    -- no way to use a TeX variable here
   \end{luacode*}
 \]
 
