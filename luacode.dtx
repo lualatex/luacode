@@ -207,17 +207,18 @@ See the source file for author and licensing information.
 %
 %    \subsection{Internal code}
 %
-%    Execute a piece of code, with a shortcut for backslash, and trying to
-%    preserve newlines. This internal macro is long so that we can use in the
-%    environment, while the corresponding user command will be short.
+%    Execute a piece of code, with shortcuts for backslash and percent, and
+%    trying to preserve newlines. This internal macro is long so that we can
+%    use in the environment, while the corresponding user command will be
+%    short.
 %
 %    \begin{macrocode}
-\newcommand \luacode@execute [1] {%
+\newcommand*\luacode@execute [1] {%
   \begingroup
   \escapechar92
+  \newlinechar10
   \edef\\{\string\\}%
   \let\%=\luacode@percentchar
-  \newlinechar=\endlinechar
   \expandafter\expandafter\expandafter\endgroup
   \luatexbase@directlua{#1}}
 %    \end{macrocode}
@@ -230,7 +231,7 @@ See the source file for author and licensing information.
 }\aux
 %    \end{macrocode}
 %
-%    Generic code for environments; argument consists is the name of a catcode
+%    Generic code for environments; the argument is the name of a catcode
 %    table.  We're normally inside a group, but let's open a new one in case
 %    we're called directly rather that using |\begin|. Define the end marker
 %    to be |\end{<envname>}| with current catcodes.
@@ -263,7 +264,7 @@ See the source file for author and licensing information.
 %    depending on the current catcode regime. So we collect it linewise and
 %    check each line against the end marker.
 %
-%    Lines storage.
+%    Sotrage for lines.
 %
 %    \begin{macrocode}
 \newtoks\luacode@lines
@@ -271,8 +272,8 @@ See the source file for author and licensing information.
   \luacode@lines\expandafter{\the\luacode@lines^^J#1}}
 %    \end{macrocode}
 %
-%    Loop initialisation. Set endlinechar excplicitely so that we can use it
-%    as a delimiter.
+%    Loop initialisation. Set endlinechar explicitely so that we can use it
+%    as a delimiter (and later when writing the code to Lua).
 %
 %    \begin{macrocode}
 \newcommand \luacode@grab@body {
@@ -284,8 +285,9 @@ See the source file for author and licensing information.
 %    The actual line-grabbing loop.
 %
 %    \begin{macrocode}
-\def\luacode@grab@lines#1^^J{%
+\long\def\luacode@grab@lines#1^^J{%
   \def\luacode@curr{#1}%
+  \luacode@strip@spaces
   \ifx\luacode@curr\luacode@endmark
     \expandafter\luacode@end
   \else
@@ -294,8 +296,36 @@ See the source file for author and licensing information.
   \fi}
 %    \end{macrocode}
 %
-%    Finally, we need a custom catcode table: everything other, except
-%    backslash, braces and letters which retain their natural catcodes.
+%    Strip catcode 12 spaces from the beginning the token list inside
+%    |\luacode@curr|. First we need catcode 12 space, then we
+%    procede in the usual way.
+%
+%    \begin{macrocode}
+\begingroup\catcode32 12 \expandafter\endgroup
+\@firstofone{\newcommand\luacode@spaceother{ }}
+\newcommand \luacode@strip@spaces {%
+  \expandafter\luacode@strip@sp@peek\luacode@curr\@nil}
+\newcommand \luacode@strip@sp@peek {%
+  \futurelet\@let@token\luacode@strip@sp@look}
+\newcommand \luacode@strip@sp@look {%
+  \expandafter\ifx\luacode@spaceother\@let@token
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi{%
+    \afterassignment\luacode@strip@sp@peek
+    \let\@let@token=
+  }{%
+    \luacode@strip@sp@def
+  }}
+\@ifdefinable \luacode@strip@sp@def \relax
+\def \luacode@strip@sp@def #1\@nil{%
+  \def\luacode@curr{#1}}
+%    \end{macrocode}
+%
+%    Finally, we need a custom catcode table for the default environment:
+%    everything other, except backslash, braces and letters which retain their
+%    natural catcodes.
 %
 %    \begin{macrocode}
 \newluatexcatcodetable \luacode@table@soft
@@ -336,25 +366,25 @@ See the source file for author and licensing information.
 %    \begin{macrocode}
 %<*testlatex>
 \documentclass{minimal}
-\usepackage{luacode}
+\usepackage{luacode, ted, trace}
 \begin{document}
 
 $\luaexec{tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('\%.', '+'))}$
 
 \newcommand\foo{3}
 \[
-\begin{luacode}
-  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-  -- comment
-  tex.sprint("-", math.sqrt(\foo))
-\end{luacode}
+  \begin{luacode}
+    tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+    -- comment
+    tex.sprint("-", math.sqrt(\foo))
+  \end{luacode}
 \]
 
 \[
-\begin{luacode*}
-  -- comment
-  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-\end{luacode*}
+  \begin{luacode*}
+    -- comment
+    tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+  \end{luacode*}
 \]
 
 \end{document}
