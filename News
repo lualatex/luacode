@@ -1,6 +1,2 @@
-(dev)
-    * Support all special chars (~ and # were previously missing).
-      Suggested by Philipp Stephani.
-
 2010/11/08 v1.0
     * initial version
