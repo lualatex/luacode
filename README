@@ -19,10 +19,11 @@ Installation
 
 Here are the recommended installation methods (preferred first).
 
-1. If you are using TeX Live 2010 or later, use 'tlmgr install luatexbase'.
-Alternatively, try your (TeX or Linux) distribution's package management system.
+1. If you are using TeX Live 2008 or later, use 'tlmgr install luacode'.
+If your are using MiKTeX, use the MiKTeX Package Manager.
+Alternatively, try you Linux distribution's package management system.
 
-2. a. Grab luatextra.tds.zip on the CTAN.
+2. a. Grab luacode.tds.zip on the CTAN.
    b. Unzip it at the root of one or your TDS trees.
    c. You may need to update some filename database after this, see your TeX
       distribution's manual for details. (Hint: with TeX Live, run 'mktexlsr';
