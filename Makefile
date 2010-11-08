@@ -54,7 +54,7 @@ define run-install
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
-$(TDS_ZIP): $(ALL_FILES)
+$(TDS_ZIP): $(ALL)
 	@echo "Making TDS-ready archive $@."
 	@$(RM) -- $@
 	@if test -e $(TEXMFROOT); then echo 'bad TEXMFROOT'; false; fi
@@ -64,7 +64,7 @@ $(TDS_ZIP): $(ALL_FILES)
 
 .PHONY: install clean mrproper help
 
-install: $(ALL)
+install: check $(ALL)
 	@echo "Installing in '$(TEXMFROOT)'."
 	$(run-install)
 
