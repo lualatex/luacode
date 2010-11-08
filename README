@@ -1,0 +1,31 @@
+                    The TEMPLATE LaTeX package for ENGINE
+
+DESCRIPTION
+
+
+Installation
+------------
+
+Here are the recommended installation methods (preferred first).
+
+1. If you are using TeX Live 2010 or later, use 'tlmgr install luatexbase'.
+Alternatively, try your (TeX or Linux) distribution's package management system.
+
+2. a. Grab luatextra.tds.zip on the CTAN.
+   b. Unzip it at the root of one or your TDS trees.
+   c. You may need to update some filename database after this, see your TeX
+      distribution's manual for details. (Hint: with TeX Live, run 'mktexlsr';
+      with MikTeX, look for "Refresh FNDB" in the MikTeX menu.)
+
+3. a. Grab the sources from CTAN or github.
+   b. Run 'make install TEXMFROOT=/path/to/texmf'.
+      (Warning: 'make install' without giving a TEXMFROOT will
+       put files in './texmf', which is probably not what you want.)
+   c. See 2c.
+
+
+Licence
+-------
+
+This package is distributed under the terms of the LPPL v1.3c or later.
+See the source file TEMPLATE.dtx for details.
