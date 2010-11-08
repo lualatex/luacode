@@ -215,10 +215,18 @@ See the source file for author and licensing information.
 \newcommand \luacode@execute [1] {%
   \begingroup
   \let\\=\@backslashchar
+  \let\%=\luacode@percentchar
   \newlinechar=\endlinechar
   \expandafter\expandafter\expandafter\endgroup
-  \luatexbase@directlua{#1}%
-}
+  \luatexbase@directlua{#1}}
+%    \end{macrocode}
+%
+%    A catcode 12 percent char for use in the previous command.
+%
+%    \begin{macrocode}
+\begingroup \escapechar\m@ne \edef\aux{\endgroup
+  \unexpanded{\newcommand\luacode@percentchar}{\string\%}%
+}\aux
 %    \end{macrocode}
 %
 %    Generic code for environments; argument consists is the name of a catcode
@@ -331,13 +339,13 @@ See the source file for author and licensing information.
 \usepackage{luacode}
 \begin{document}
 
-$\luaexec{tex.sprint("\\\\pi = ", math.pi)}$
+$\luaexec{tex.sprint("\\\\pi \\\\neq ", tostring(math.pi):gsub('\%.', '+'))}$
 
 \[
 \begin{luacode}
   local foo
   -- comment
-  tex.sprint("\\\\pi = ", math.pi)
+  tex.sprint("\\\\pi \\\\neq ", tostring(math.pi):gsub('\%.', '+'))
 \end{luacode}
 \]
 
@@ -345,7 +353,7 @@ $\luaexec{tex.sprint("\\\\pi = ", math.pi)}$
 \begin{luacode*}
   local foo
   -- coment
-  tex.sprint("\\pi = ", math.pi)
+  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
 \end{luacode*}
 \]
 
