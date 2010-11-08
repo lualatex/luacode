@@ -42,7 +42,7 @@ $(UNPACKED): $(DTX)
 check: $(UNPACKED)
 	lualatex -interaction=batchmode $(TEST) >/dev/null
 
-$(CTAN_ZIP): $(UNPACKED) $(SOURCES) $(TDS_ZIP)
+$(CTAN_ZIP): $(DOC) $(SOURCES) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
 	@zip -9 -q $@ $^
