@@ -1,4 +1,4 @@
-                    The TEMPLATE LaTeX package for ENGINE
+                    The luacode package for LuaLaTeX
 
 DESCRIPTION
 
@@ -28,4 +28,4 @@ Licence
 -------
 
 This package is distributed under the terms of the LPPL v1.3c or later.
-See the source file TEMPLATE.dtx for details.
+See the source file luacode.dtx for details.

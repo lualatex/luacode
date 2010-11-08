@@ -1,4 +1,4 @@
-NAME   = TEMPLATE
+NAME   = luacode
 FORMAT = lualatex
 
 DTX       = $(NAME).dtx
