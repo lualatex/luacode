@@ -435,7 +435,7 @@ See the source file for author and licensing information.
 
 \( \directlua{
   local foo_bar = "A full line.\string\n"
-  tex.sprint("\\pi \\neq ", tostring(math.pi))
+  tex.sprint("\string\\pi \string\\neq", tostring(math.pi))
   % a tex comment: no easy way to get a % character above
   tex.sprint("-", math.sqrt(\foo))
 } \)
