@@ -40,7 +40,7 @@ $(UNPACKED): $(DTX)
 	tex -interaction=batchmode $< >/dev/null
 
 check: $(UNPACKED)
-	pdflatex -interaction=batchmode $(TEST) >/dev/null
+	lualatex -interaction=batchmode $(TEST) >/dev/null
 
 $(CTAN_ZIP): $(UNPACKED) $(SOURCES) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."

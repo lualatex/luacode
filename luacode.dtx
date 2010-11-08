@@ -197,10 +197,12 @@ See the source file for author and licensing information.
 \fi
 %    \end{macrocode}
 %
-%    Use \pk{luatexbase} for catcode tables.
+%    Use \pk{luatexbase} for catcode tables, and ensure we have the primitives
+%    we need.
 %
 %    \begin{macrocode}
 \RequirePackage{luatexbase}
+\luatexbase@ensure@primitive{scantextokens}%
 %    \end{macrocode}
 %
 %    \subsection{Internal code}
@@ -210,41 +212,80 @@ See the source file for author and licensing information.
 %    environment, while the corresponding user command will be short.
 %
 %    \begin{macrocode}
-\newcommand \luacode@exec [1] {%
+\newcommand \luacode@execute [1] {%
   \begingroup
   \let\\=\@backslashchar
   \newlinechar=\endlinechar
-  \expandafter\endgroup
+  \expandafter\expandafter\expandafter\endgroup
   \luatexbase@directlua{#1}%
 }
 %    \end{macrocode}
 %
 %    Generic code for environments; argument consists is the name of a catcode
-%    table.  Define a body grabber using current catcodes for end marker and
-%    use it.
-%
-%    We're normally inside a group, but let's open a new one in case we're
-%    called directly rather that using |\begin|. Execute end code of current
-%    environement at end.
+%    table.  We're normally inside a group, but let's open a new one in case
+%    we're called directly rather that using |\begin|. Define the end marker
+%    to be |\end{<envname>}| with current catcodes.
 %
 %    \begin{macrocode}
 \newcommand*\luacode@begin [1] {%
   \begingroup
   \luatexcatcodetable#1\relax
-  \let\end\relax
-  \edef\luacode@end{\end{\@currenvir}}%
-  \edef\luacode@end@st{\scantextokens\expandafter{\luacode@end}}%
-  \edef\luacode@define@grabber{%
-    \long\def\noexpand\luacode@grab##1\luacode@end@st{%
-      \noexpand\luacode@execute{##1}%
-      \luacode@end}}%
-  \luacode@define@grabber
-  \expandafter\endgroup
-  \luacode@grab
-}
+  \edef\luacode@endmark{\string\end{\@currenvir}}%
+  \expandafter\def \expandafter\luacode@endmark \expandafter{%
+    \luatexscantextokens \expandafter{\luacode@endmark}}%
+  \luacode@grab@body}
 %    \end{macrocode}
 %
-%    Custom catcode table: everything other, except backslash and braces.
+%    We'll define the body grabber in a moment, but let's see how the
+%    environment ends now.
+%
+%    \begin{macrocode}
+\newcommand\luacode@end{%
+  \edef\luacode@next{%
+    \noexpand\luacode@execute{\the\luacode@lines}%
+    \noexpand\end{\@currenvir}}%
+  \expandafter\endgroup
+  \luacode@next}
+%    \end{macrocode}
+%
+%    It is not possible to grab the body using a macro with delimited
+%    argument, since the end marker may contains open-group characters,
+%    depending on the current catcode regime. So we collect it linewise and
+%    check each line against the end marker.
+%
+%    Lines storage.
+%
+%    \begin{macrocode}
+\newtoks\luacode@lines
+\newcommand*\luacode@addline [1] {%
+  \luacode@lines\expandafter{\the\luacode@lines^^J#1}}
+%    \end{macrocode}
+%
+%    Loop initialisation. Set endlinechar excplicitely so that we can use it
+%    as a delimiter.
+%
+%    \begin{macrocode}
+\newcommand \luacode@grab@body {
+  \luacode@lines{}%
+  \endlinechar10
+  \luacode@grab@lines}
+%    \end{macrocode}
+%
+%    The actual line-grabbing loop.
+%
+%    \begin{macrocode}
+\def\luacode@grab@lines#1^^J{%
+  \def\luacode@curr{#1}%
+  \ifx\luacode@curr\luacode@endmark
+    \expandafter\luacode@end
+  \else
+    \expandafter\luacode@addline\expandafter{\luacode@curr}%
+    \expandafter\luacode@grab@lines
+  \fi}
+%    \end{macrocode}
+%
+%    Finally, we need a custom catcode table: everything other, except
+%    backslash, braces and letters which retain their natural catcodes.
 %
 %    \begin{macrocode}
 \newluatexcatcodetable \luacode@table@soft
@@ -253,6 +294,8 @@ See the source file for author and licensing information.
   \catcode 92  0
   \catcode 123 1
   \catcode 125 2
+  \setcatcoderange {65}{90} {11}
+  \setcatcoderange {97}{122}{11}
 }
 %    \end{macrocode}
 %
@@ -283,8 +326,31 @@ See the source file for author and licensing information.
 %    Very minimal, just check that the package correctly loads.
 %
 %    \begin{macrocode}
-%<testlatex>\RequirePackage{luacode}
-%<testlatex>\stop
+%<*testlatex>
+\documentclass{minimal}
+\usepackage{luacode}
+\begin{document}
+
+$\luaexec{tex.sprint("\\\\pi = ", math.pi)}$
+
+\[
+\begin{luacode}
+  local foo
+  -- comment
+  tex.sprint("\\\\pi = ", math.pi)
+\end{luacode}
+\]
+
+\[
+\begin{luacode*}
+  local foo
+  -- coment
+  tex.sprint("\\pi = ", math.pi)
+\end{luacode*}
+\]
+
+\end{document}
+%</testlatex>
 %    \end{macrocode}
 %
 %
