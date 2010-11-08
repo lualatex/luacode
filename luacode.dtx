@@ -79,6 +79,7 @@ See the source file for author and licensing information.
 \usepackage{lmodern}
 \usepackage{fixltx2e}
 
+\usepackage{booktabs}
 \usepackage{xspace}
 \usepackage[a4paper]{geometry}
 \usepackage[english]{babel}
@@ -126,11 +127,70 @@ See the source file for author and licensing information.
 % \maketitle
 %
 % \begin{abstract}
+% Executing Lua code from within \TeX\ with |\directlua| can sometimes be
+% tricky: there is no easy way to use the percent character, counting
+% backslashes may be hard, and Lua comments don't work the way you expect.
+% This package provides the |\luaexec| command and the |luacode(*)|
+% environments to help with these problems.
 % \end{abstract}
 %
 % \tableofcontents
 %
 % \section{Documentation}
+%
+% For an introduction to the most important gotchas of |\directlua|, see
+% \file{lualatex-doc.pdf}. Before presenting the tools in this package, let me
+% insist that the most robust way to manage a non-trivial piece of Lua code is
+% to use an external file and source it from Lua, as explained in the cited
+% document.
+%
+% \medskip
+%
+% The |\luaexec| command is similar to |\directlua| but with a few additional
+% features:\footnote{And one major drawback: it is not purely expandable. If
+% you don't know what it means, then you probably shouldn't bother.}
+% |\\| gives a double blackslash (convenient in Lua strings) and |\%| a
+% percent character. If you happen to need a single backslash, you can still
+% use a constructs like |\string\n| just as with |\directlua|. Also, \TeX\
+% macros are expanded normally, allowing to easily pass information from \TeX\
+% to Lua.
+%
+% The |luacode| environment is similar, except that you can use |%| and other
+% special characters directly (but |\%| also works). Only the backslash and
+% the braces keep their special meaning, so that macros still work as usual,
+% but you still need to use a |\string| trick to get a single backslash.
+%
+% A variant |luacode*| goes further and makes even backslash a normal
+% character, so that you don't need any trick to obtain a single backslash. On
+% the other end, macros don't work any more.
+%
+% In addition, the line breaks in the environments are respected, so that you
+% can use line-wise Lua comments in the normal way, without mistakenly
+% commenting the rest of the chunk.
+%
+% \begin{center}
+%   \begin{tabular}{rcccc}
+%     \toprule
+%                         & |\directlua|    & |\luaexec|      & |luacode|       & |luacode*|   \\
+%     \midrule
+%     Macros              & Yes             & Yes             & Yes             & No           \\
+%     Single backslash    & Using |\string| & Using |\string| & Using |\string| & Just |\|     \\
+%     Double backslash    & |\string\\|     & |\\|            & |\\|            & |\\|         \\
+%     Percent             & No easy way     & |\%|            & |\%| or |%|     & |%|          \\
+%     \TeX\ line comments & Yes             & Yes             & No              & No           \\
+%     Lua line comments   & No              & No              & Yes             & Yes          \\
+%     \bottomrule
+%   \end{tabular}
+% \end{center}
+%
+% Note that you cannot use the environments inside the argument of a command
+% (just as with verbatim commands and environments).  If you wish to define
+% derived environments, you'll need to use |\luacode| \dots |\endluacode|
+% instead of the usual |\begin| |\end| pair in your environment's definition.
+% For the stared variant, use |\luacodestar| and |\endluacodestar|.
+%
+% The test file (section~\ref{test}, or \file{test-luacode.tex} in the same
+% directory as this document) provides stupid but complete examples.
 %
 %    \section{Implementation}
 %
@@ -363,61 +423,62 @@ See the source file for author and licensing information.
 %</texpackage>
 %    \end{macrocode}
 %
-%    \section{Test file}
+%    \section{Test file} \label{test}
 %
 %    \begin{macrocode}
 %<*testlatex>
 \documentclass{minimal}
-\usepackage{luacode, ted, trace}
+\usepackage{luacode}
 \begin{document}
 
-$\luaexec{
-  tex.sprint("\\pi \\neq ",
-  % a tex comment
-  tostring(math.pi):gsub('\%.', '+'))
-}$
-
 \newcommand\foo{3}
+
+\( \directlua{
+  local foo_bar = "A full line.\string\n"
+  tex.sprint("\\pi \\neq ", tostring(math.pi))
+  % a tex comment: no easy way to get a % character above
+  tex.sprint("-", math.sqrt(\foo))
+} \)
+
+
+\( \luaexec{
+  local foo_bar = "A full line.\string\n"
+  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('\%.', '+'))
+  % a tex comment
+  tex.sprint("-", math.sqrt(\foo))
+} \)
+
 \[
   \begin{luacode}
+    local foo = "A full line.\string\n"
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-    -- a lua comment
+    -- a lua comment: we could have used \% above, too
     tex.sprint("-", math.sqrt(\foo))
   \end{luacode}
 \]
 
 \[
   \begin{luacode*}
-    -- a lua comment
+    local foo_bar = "A full line.\n"
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+    -- a lua comment: no way to use a TeX variable here
   \end{luacode*}
 \]
 
-\newenvironment{mathluacode}{
-  \[
-    \luacode
-  }{%
-    \endluacode
-  \]
-}
-
-\newenvironment{mathluacode*}{
-  \[
-    \luacodestar
-  }{%
-    \endluacodestar
-  \]
-}
+\newenvironment{mathluacode} { \[ \luacode     }{ \endluacode     \] }
+\newenvironment{mathluacode*}{ \[ \luacodestar }{ \endluacodestar \] }
 
 \begin{mathluacode}
+  local foo = "A full line.\string\n"
   tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-  -- a lua comment
+  -- a lua comment: we could have used \% above, too
   tex.sprint("-", math.sqrt(\foo))
 \end{mathluacode}
 
 \begin{mathluacode*}
-  -- a lua comment
+  local foo_bar = "A full line.\n"
   tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+  -- a lua comment: no way to use a TeX variable here
 \end{mathluacode*}
 
 \end{document}
