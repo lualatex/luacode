@@ -352,6 +352,8 @@ See the source file for author and licensing information.
 %    \begin{macrocode}
 \newenvironment {luacode}  {\luacode@begin\luacode@table@soft} {}
 \newenvironment {luacode*} {\luacode@begin\CatcodeTableOther}  {}
+\newcommand     \luacodestar    {\@nameuse{luacode*}}
+\def            \endluacodestar {\@nameuse{endluacode*}}
 %    \end{macrocode}
 %
 %    We're already done!
@@ -369,23 +371,54 @@ See the source file for author and licensing information.
 \usepackage{luacode, ted, trace}
 \begin{document}
 
-$\luaexec{tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('\%.', '+'))}$
+$\luaexec{
+  tex.sprint("\\pi \\neq ",
+  % a tex comment
+  tostring(math.pi):gsub('\%.', '+'))
+}$
 
 \newcommand\foo{3}
 \[
   \begin{luacode}
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
-    -- comment
+    -- a lua comment
     tex.sprint("-", math.sqrt(\foo))
   \end{luacode}
 \]
 
 \[
   \begin{luacode*}
-    -- comment
+    -- a lua comment
     tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
   \end{luacode*}
 \]
+
+\newenvironment{mathluacode}{
+  \[
+    \luacode
+  }{%
+    \endluacode
+  \]
+}
+
+\newenvironment{mathluacode*}{
+  \[
+    \luacodestar
+  }{%
+    \endluacodestar
+  \]
+}
+
+\begin{mathluacode}
+  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+  -- a lua comment
+  tex.sprint("-", math.sqrt(\foo))
+\end{mathluacode}
+
+\begin{mathluacode*}
+  -- a lua comment
+  tex.sprint("\\pi \\neq ", tostring(math.pi):gsub('%.', '+'))
+\end{mathluacode*}
 
 \end{document}
 %</testlatex>
