@@ -146,12 +146,17 @@ See the source file for author and licensing information.
 %
 % \medskip
 %
-% The |\luaexec| command is similar to |\directlua| but with a few additional
-% features:\footnote{And one major drawback: it is not purely expandable. If
-% you don't know what it means, then you probably shouldn't bother.}
-% |\\| gives a double blackslash (convenient in Lua strings) and |\%| a
-% percent character. If you happen to need a single backslash, you can still
-% use a constructs like |\string\n| just as with |\directlua|. Also, \TeX\
+% First, the exact syntax of |\directlua| has changed along version of Lua\TeX, so
+% this package provides a |\luadirect| command which is an exact synonym of
+% |\directlua| except that it doesn't have the funny, changing parts of its
+% syntax.\footnote{And also, it expands in two steps instead of one. If you
+% don't known what it means, then you probably don't need to.}
+%
+% The |\luaexec| command is similar to |\luadirect| but with a few additional
+% features:\footnote{And one major drawback: it is not purely expandable. See
+% above.} |\\| gives a double blackslash (convenient in Lua strings) and |\%|
+% a percent character. If you happen to need a single backslash, you can still
+% use a constructs like |\string\n| just as with |\luadirect|. Also, \TeX\
 % macros are expanded normally, allowing to easily pass information from \TeX\
 % to Lua.
 %
@@ -171,7 +176,7 @@ See the source file for author and licensing information.
 % \begin{center}
 %   \begin{tabular}{rcccc}
 %     \toprule
-%                         & |\directlua|    & |\luaexec|      & |luacode|       & |luacode*|   \\
+%                         & |\luadirect|    & |\luaexec|      & |luacode|       & |luacode*|   \\
 %     \midrule
 %     Macros              & Yes             & Yes             & Yes             & No           \\
 %     Single backslash    & Using |\string| & Using |\string| & Using |\string| & Just |\|     \\
@@ -401,9 +406,10 @@ See the source file for author and licensing information.
 %
 %    \subsection{Public macros and environments}
 %
-%    The |\luaexec| macro.
+%    The |\luadirect| and |\luaexec| macro.
 %
 %    \begin{macrocode}
+\@ifdefinable\luadirect {\let\luadirect\luatexbase@directlua}
 \newcommand*\luaexec [1] {\luacode@execute{#1}}
 %    \end{macrocode}
 %
@@ -433,7 +439,7 @@ See the source file for author and licensing information.
 
 \newcommand\foo{3}
 
-\( \directlua{
+\( \luadirect{
   local foo_bar = "A full line.\string\n"
   tex.sprint("\string\\pi \string\\neq", tostring(math.pi))
   % a tex comment: no easy way to get a % character above
