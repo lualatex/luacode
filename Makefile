@@ -34,7 +34,7 @@ world: ctan
 .PHONY: all doc unpack ctan tds check world
 
 %.pdf: %.dtx
-	latexmk -silent $< >/dev/null
+	latexmk -pdf -silent $< >/dev/null
 
 $(UNPACKED): $(DTX)
 	tex -interaction=batchmode $< >/dev/null
