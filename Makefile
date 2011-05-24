@@ -70,7 +70,7 @@ install: check $(ALL)
 
 clean:
 	@latexmk -silent -c $(DTX) >/dev/null
-	@rm -f -- *.log
+	@rm -f -- test-*.log test-*.aux test-*.pdf
 
 mrproper: clean
 	@rm -f -- $(GENERATED) $(ZIPS)
