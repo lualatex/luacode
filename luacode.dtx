@@ -1,6 +1,6 @@
 % \iffalse meta-comment (by the way, this file is contains UTF-8)
 %
-% Written in 2010 by Manuel Pégourié-Gonnard <mpg@elzevir.fr>
+% Written in 2010, 2011 by Manuel Pégourié-Gonnard <mpg@elzevir.fr>
 %
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -140,29 +140,29 @@ See the source file for author and licensing information.
 %
 % For an introduction to the most important gotchas of |\directlua|, see
 % \file{lualatex-doc.pdf}. Before presenting the tools in this package, let me
-% insist that the most robust way to manage a non-trivial piece of Lua code is
-% to use an external file and source it from Lua, as explained in the cited
-% document.
+% insist that the best way to manage a non-trivial piece of Lua code is
+% probably to use an external file and source it from Lua, as explained in the
+% cited document.
 %
 % \medskip
 %
 % First, the exact syntax of |\directlua| has changed along version of
 % Lua\TeX, so this package provides a |\luadirect| command which is an exact
 % synonym of |\directlua| except that it doesn't have the funny, changing
-% parts of its syntax.\footnote{And also, it expands in two steps instead of
-% one. If you don't known what it means, then you probably don't need to.}
+% parts of its syntax.\footnote{And it expands in two steps If you don't known
+% what it means, then you hopefully don't need to.}
 %
 % The problems with |\directlua| (or |\luadirect|) are mainly with \TeX\
 % special characters. Actually, things are not that bad, since most special
 % characters do work, namely: |_|, |^|, |&|, \verb+$+, |{|, |}|. Three are a
 % bit tricky but they can be managed with |\string|: |\| and |~|. Only |%| is
 % really hard to obtain. Also, \TeX\ macros are expanded, which is good since
-% it allows to pass information from \TeX\ to Lua, but you must be carefull
+% it allows to pass information from \TeX\ to Lua, but you must be careful
 % and use only purely expandable macros.
 %
 % The |\luaexec| command is similar to |\luadirect| but with a few additional
 % features:\footnote{And one major drawback: it is not purely expandable. See
-% above.} |\\| gives a double blackslash (convenient in Lua strings),  |\%| a
+% above.} |\\| gives a double backslash (convenient in Lua strings),  |\%| a
 % percent character, and |~| just works. If you happen to need a single
 % backslash, you can still use a construct like |\string\n| just as with
 % |\luadirect|. Also, \TeX\ macros are expanded.
@@ -254,7 +254,7 @@ See the source file for author and licensing information.
 %    Package declaration.
 %
 %    \begin{macrocode}
-\ProvidesPackage{luacode}[2010/11/08 v1.0 lua-in-tex helpers (mpg)]
+\ProvidesPackage{luacode}[2011/05/24 v1.0 lua-in-tex helpers (mpg)]
 %    \end{macrocode}
 %
 %    Make sure Lua\TeX\ is used.
@@ -344,7 +344,7 @@ See the source file for author and licensing information.
 %    depending on the current catcode regime. So we collect it linewise and
 %    check each line against the end marker.
 %
-%    Sotrage for lines.
+%    Storage for lines.
 %
 %    \begin{macrocode}
 \newtoks\luacode@lines
