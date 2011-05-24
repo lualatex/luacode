@@ -1,0 +1,13 @@
+# generated
+luacode.pdf
+luacode.sty
+luacode*.zip
+test-*
+texmf/
+
+# temp
+*.log
+*.aux
+*.toc
+*.idx
+*.fdb_latexmk
