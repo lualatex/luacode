@@ -407,16 +407,25 @@ See the source file for author and licensing information.
 %    everything other, except backslash, braces and letters which retain their
 %    natural catcodes.
 %
+%    Be carefull about the name of the macro for setting catcode ranges which
+%    is currently changing in luatexbase. The group here doesn't matter since
+%    catcode table settings are always global.
+%
 %    \begin{macrocode}
 \newluatexcatcodetable \luacode@table@soft
+\begingroup
+\ifdefined\SetCatcodeRange \else
+  \let\SetCatcodeRange\setcatcoderange
+\fi
 \setluatexcatcodetable \luacode@table@soft {%
   \luatexcatcodetable\CatcodeTableOther
   \catcode 92  0
   \catcode 123 1
   \catcode 125 2
-  \setcatcoderange {65}{90} {11}
-  \setcatcoderange {97}{122}{11}
+  \SetCatcodeRange {65}{90} {11}
+  \SetCatcodeRange {97}{122}{11}
 }
+\endgroup
 %    \end{macrocode}
 %
 %    \subsection{Public macros and environments}
