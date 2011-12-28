@@ -138,6 +138,8 @@ See the source file for author and licensing information.
 %
 % \section{Documentation}
 %
+% \subsection{Lua code in \LaTeX}
+%
 % For an introduction to the most important gotchas of |\directlua|, see
 % \file{lualatex-doc.pdf}. Before presenting the tools in this package, let me
 % insist that the best way to manage a non-trivial piece of Lua code is
@@ -149,7 +151,7 @@ See the source file for author and licensing information.
 % First, the exact syntax of |\directlua| has changed along version of
 % Lua\TeX, so this package provides a |\luadirect| command which is an exact
 % synonym of |\directlua| except that it doesn't have the funny, changing
-% parts of its syntax.\footnote{And it expands in two steps instead of one. If
+% parts of its syntax.\footnote{And expands in two steps instead of one. If
 % you don't know what it means, then you hopefully don't need to.}
 %
 % The problems with |\directlua| (or |\luadirect|) are mainly with \TeX\
@@ -189,9 +191,9 @@ See the source file for author and licensing information.
 %     Single backslash    & Using |\string| & Using |\string| & Using |\string| & Just |\|     \\
 %     Double backslash    & |\string\\|     & |\\|            & |\\|            & |\\|         \\
 %     Tilde               & |\string~|      & |~|             & |~|             & |~|          \\
-%     Sharp               & |\string#|      & |\#|            & |\#| or |#|     & |#|          \\
-%     Percent             & No easy way     & |\%|            & |\%| or |%|     & |%|          \\
-%     \TeX\ line comments & Yes             & Yes             & No              & No           \\
+%     Sharp               & |\string#|      & |\#|            & |#| (or |\#|)   & |#|          \\
+%     Percent             & No easy way     & |\%|            & |%| (or |\%|)   & |%|          \\
+%     \TeX\ comments      & Yes             & Yes             & No              & No           \\
 %     Lua line comments   & No              & No              & Yes             & Yes          \\
 %     \bottomrule
 %   \end{tabular}
@@ -205,6 +207,40 @@ See the source file for author and licensing information.
 %
 % The test file (section~\ref{test}, or \file{test-luacode.tex} in the same
 % directory as this document) provides stupid but complete examples.
+%
+% \subsection{Helper macros}
+%
+% As mentioned in the previous section, except for trivial pieces of codes (or
+% examples) it is good practice to keep all your Lua code in separate |.lua|
+% files and then use |\luadirect| only to |require()| or |dofile()| it and
+% define \LaTeX\ wrappers for some functions, eg:
+% \begin{quote}
+%   |\newcommand*\foo[2]{\luadirect{foo("#1", #2)}}|
+% \end{quote}
+% This way, problems with \TeX\ special characters are avoided, since most of
+% the Lua is never seen by \TeX. Unfortunately, there is still potential
+% for problems. For example |\foo{a"b}{2}| will cause the Lua interpreter to
+% complain since the |"| in |#1| will end the string; we want the Lua
+% interpreter to see |"a\"b"| as the first argument.
+%
+% Fortunately, Lua\TeX\ offers a primitive that does exactly what we need:
+% escape characters that need to be escaped in a Lua string. Unfortunately, it
+% has a very long name (especially in the prefixed form available in \LaTeX):
+% |\luatexluaescapestring|.  Also, you need to think to use quotes in addition
+% to this primitive.  So this package provides a shorter version: |\luastring|
+% that also include the quotes, so a safer version of |\foo| might be defined
+% as
+% \begin{quote}
+%   |\newcommand*\foo[2]{\luadirect{foo(\luastring{#1}, #2)}}|
+% \end{quote}
+%
+% It should be noted that the argument of |\luastring| is fully
+% expanded\footnote{If you don't know what this means, just skip this
+% paragraph.} before being turned into a Lua string. In case where such an
+% expansion is unwanted, two variants are provided: |\luastringN| for no
+% expansion, and |\luastringO| for one-level expansion (of the first token)
+% only.
+%
 %
 %    \section{Implementation}
 %
