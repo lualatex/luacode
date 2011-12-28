@@ -572,6 +572,24 @@ See the source file for author and licensing information.
   -- a lua comment: no way to use a TeX variable here
 \end{mathluacode*}
 
+\begin{luacode*}
+  function foo(str)
+    assert(typeof(str) == 'string')
+    tex.sprint(-2, str)
+  end
+\end{luacode*}
+
+\newcommand*\foo [1] {\texttt{\luadirect{foo(\luastring{#1})}}\par}
+\foo{abc}
+\foo{123}
+\foo{a"b\string\nc'd}
+
+\def\mac{\onelevel}
+\def\onelevel{fully expanded}
+string : \texttt{\luadirect{foo(\luastring \mac)}}\par
+stringO: \texttt{\luadirect{foo(\luastringO\mac)}}\par
+stringN: \texttt{\luadirect{foo(\luastringN\mac)}}\par
+
 \end{document}
 %</testlatex>
 %    \end{macrocode}
