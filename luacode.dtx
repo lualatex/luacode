@@ -77,8 +77,9 @@ See the source file for author and licensing information.
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
 \usepackage{lmodern}
-\usepackage{fixltx2e}
+\usepackage{fixltx2e, mparhack}
 
+\usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{xspace}
 \usepackage[a4paper]{geometry}
@@ -95,6 +96,7 @@ See the source file for author and licensing information.
   \def\cs#1{\@backslashchar #1}}
 
 \MakeShortVerb\|
+\renewcommand\MacroFont{\ttfamily\small\color{blue}}
 
 \begin{document}
   \DocInput{luacode.dtx}%
@@ -148,6 +150,7 @@ See the source file for author and licensing information.
 %
 % \medskip
 %
+% \DescribeMacro\luadirect
 % First, the exact syntax of |\directlua| has changed along version of
 % Lua\TeX, so this package provides a |\luadirect| command which is an exact
 % synonym of |\directlua| except that it doesn't have the funny, changing
@@ -162,25 +165,31 @@ See the source file for author and licensing information.
 % it allows to pass information from \TeX\ to Lua, but you must be careful
 % and use only purely expandable macros.
 %
+% \DescribeMacro\luaexec
 % The |\luaexec| command is similar to |\luadirect| but with a few additional
 % features:\footnote{And one major drawback: it is not purely expandable. See
-% above.} |\\| gives a double backslash (convenient in Lua strings),  |\%| a
-% percent character, and |~| just works. If you happen to need a single
+% previous note.} |\\| gives a double backslash (convenient in Lua strings),
+% |\%| a percent character, and |~| just works. If you happen to need a single
 % backslash, you can still use a construct like |\string\n| just as with
 % |\luadirect|. Also, \TeX\ macros are expanded.
 %
+% \DescribeEnv{luacode}
 % The |luacode| environment is similar, except that you can use |%| and other
 % special characters directly (but |\%| also works). Only the backslash and
 % the braces keep their special meaning, so that macros still work as usual,
 % and you still need to use a |\string| trick to get a single backslash.
 %
+% \DescribeEnv{luacode*}
 % A variant |luacode*| goes further and makes even backslash a normal
 % character, so that you don't need any trick to obtain a single backslash. On
-% the other end, macros don't work any more.
+% the other end, macros don't work any more.  In addition, the line breaks in
+% the environments are respected, so that you can use line-wise Lua comments
+% in the normal way, without mistakenly commenting the rest of the chunk.
 %
-% In addition, the line breaks in the environments are respected, so that you
-% can use line-wise Lua comments in the normal way, without mistakenly
-% commenting the rest of the chunk.
+% \medskip
+%
+% The following table summarizes how to use special characters with the
+% various commands and environments.
 %
 % \begin{center}
 %   \begin{tabular}{rcccc}
@@ -199,6 +208,7 @@ See the source file for author and licensing information.
 %   \end{tabular}
 % \end{center}
 %
+% \DescribeEnv{luacodestar}
 % Note that you cannot use the environments inside the argument of a command
 % (just as with verbatim commands and environments).  If you wish to define
 % derived environments, you'll need to use |\luacode| \dots |\endluacode|
@@ -223,6 +233,7 @@ See the source file for author and licensing information.
 % complain since the |"| in |#1| will end the string; we want the Lua
 % interpreter to see |"a\"b"| as the first argument.
 %
+% \DescribeMacro\luastring
 % Fortunately, Lua\TeX\ offers a primitive that does exactly what we need:
 % escape characters that need to be escaped in a Lua string. Unfortunately, it
 % has a very long name (especially in the prefixed form available in \LaTeX):
@@ -234,6 +245,8 @@ See the source file for author and licensing information.
 %   |\newcommand*\foo[2]{\luadirect{foo(\luastring{#1}, #2)}}|
 % \end{quote}
 %
+% \DescribeMacro\luastringN
+% \DescribeMacro\luastringO
 % It should be noted that the argument of |\luastring| is fully
 % expanded\footnote{If you don't know what this means, just skip this
 % paragraph.} before being turned into a Lua string. In case where such an
