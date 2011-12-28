@@ -494,6 +494,14 @@ See the source file for author and licensing information.
 \def            \endluacodestar {\@nameuse{endluacode*}}
 %    \end{macrocode}
 %
+%    Helper macros
+%
+%    \begin{macrocode}
+\newcommand \luastring   [1] {"\luatexluaescapestring{#1}"}
+\newcommand \luastringO  [1] {\luastring{\unexpanded\expandafter{#1}}}
+\newcommand \luastringN  [1] {\luastring{\unexpanded{#1}}}
+%    \end{macrocode}
+%
 %    We're already done!
 %
 %    \begin{macrocode}
@@ -573,22 +581,22 @@ See the source file for author and licensing information.
 \end{mathluacode*}
 
 \begin{luacode*}
-  function foo(str)
-    assert(typeof(str) == 'string')
+  function myfunc(str)
+    assert(type(str) == 'string')
     tex.sprint(-2, str)
   end
 \end{luacode*}
 
-\newcommand*\foo [1] {\texttt{\luadirect{foo(\luastring{#1})}}\par}
-\foo{abc}
-\foo{123}
-\foo{a"b\string\nc'd}
+\newcommand*\mymac [1] {\texttt{\luadirect{myfunc(\luastring{#1})}}\par}
+\mymac{abc}
+\mymac{123}
+\mymac{a"b\string\nc'd}
 
 \def\mac{\onelevel}
 \def\onelevel{fully expanded}
-string : \texttt{\luadirect{foo(\luastring \mac)}}\par
-stringO: \texttt{\luadirect{foo(\luastringO\mac)}}\par
-stringN: \texttt{\luadirect{foo(\luastringN\mac)}}\par
+string : \texttt{\luadirect{myfunc(\luastring \mac)}}\par
+stringO: \texttt{\luadirect{myfunc(\luastringO\mac)}}\par
+stringN: \texttt{\luadirect{myfunc(\luastringN\mac)}}\par
 
 \end{document}
 %</testlatex>
