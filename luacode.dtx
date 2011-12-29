@@ -339,6 +339,29 @@ See the source file for author and licensing information.
 %
 %    \subsection{Internal code}
 %
+%    Produce Lua code printing debug info for the given argument.
+%
+%    \begin{macrocode}
+\newcommand \luacode@printdbg [1] {%
+  texio.write_nl('log',
+    '-- BEGIN luacode debug (on input line \the\inputlineno)')
+  texio.write_nl('log', "\luatexluaescapestring{#1}")
+  texio.write_nl('log',
+    '-- END luacode debug (on input line \the\inputlineno)')
+}
+%    \end{macrocode}
+%
+%    Execute a piece of Lua code, possibly printing debug info.
+%    |maybe@printdbg| will be either |printdbg| or |gobble|, see user macros.
+%
+%    \begin{macrocode}
+\newcommand \luacode@dbg@exec [1] {%
+  \directlua {
+    \luacode@maybe@printdbg{#1}
+    #1
+  }%
+}
+%    \end{macrocode}
 %    Execute a piece of code, with shortcuts for double-backslash, percent and
 %    tilde, and trying to preserve newlines. This internal macro is long so
 %    that we can use in the environment, while the corresponding user command
@@ -347,7 +370,7 @@ See the source file for author and licensing information.
 %    \begin{macrocode}
 \begingroup \catcode`\~\active \expandafter\endgroup
 \@firstofone{%
-  \newcommand*\luacode@execute [1] {%
+  \newcommand \luacode@execute [1] {%
     \begingroup
     \escapechar92
     \newlinechar10
@@ -356,7 +379,7 @@ See the source file for author and licensing information.
     \let\%=\luacode@percentchar
     \let\#=\luacode@sharpchar
     \expandafter\expandafter\expandafter\endgroup
-    \luatexbase@directlua{#1}}
+    \luacode@dbg@exec{#1}}
 }
 %    \end{macrocode}
 %
@@ -434,9 +457,9 @@ See the source file for author and licensing information.
   \fi}
 %    \end{macrocode}
 %
-%    Strip catcode 12 spaces from the beginning the token list inside
-%    |\luacode@curr|. First we need catcode 12 space, then we
-%    procede in the usual way.
+%    Strip catcode 12 spaces from the beginning of the token list inside
+%    |\luacode@curr|. First we need catcode 12 space, then we procede in the
+%    usual way.
 %
 %    \begin{macrocode}
 \begingroup\catcode32 12 \expandafter\endgroup
@@ -488,10 +511,18 @@ See the source file for author and licensing information.
 %
 %    \subsection{Public macros and environments}
 %
-%    The |\luadirect| and |\luaexec| macro.
+%    Debugging.
 %
 %    \begin{macrocode}
-\@ifdefinable\luadirect {\let\luadirect\luatexbase@directlua}
+\newcommand \LuaCodeDebugOn  {\let \luacode@maybe@printdbg \luacode@printdbg}
+\newcommand \LuaCodeDebugOff {\let \luacode@maybe@printdbg \@gobble}
+\LuaCodeDebugOff
+%    \end{macrocode}
+%
+%    The |\luadirect| and |\luaexec| macros.
+%
+%    \begin{macrocode}
+\@ifdefinable\luadirect {\let\luadirect\luacode@dbg@exec}
 \newcommand*\luaexec [1] {\luacode@execute{#1}}
 %    \end{macrocode}
 %
@@ -607,6 +638,20 @@ See the source file for author and licensing information.
 string : \texttt{\luadirect{myfunc(\luastring \mac)}}\par
 stringO: \texttt{\luadirect{myfunc(\luastringO\mac)}}\par
 stringN: \texttt{\luadirect{myfunc(\luastringN\mac)}}\par
+
+\LuaCodeDebugOn
+\luadirect  {local foo = 'bar'      .. \luastring{a"b'c}}
+\luaexec    {local foo = 'bar\%\#'  .. \luastring{a"b'c}}
+\begin{luacode}
+  local foo = 'bar'
+  local baz = 12 % 2
+  assert(\luastring\mac  == 'fully expanded')
+  -- assert(\luastringO\mac == '\\onelevel')
+  -- assert(\luastringN\mac == '\\mac')
+\end{luacode}
+
+\LuaCodeDebugOff
+\luadirect{local rem = 'dbg should be disabled here'}
 
 \end{document}
 %</testlatex>
