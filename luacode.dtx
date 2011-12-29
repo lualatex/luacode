@@ -154,7 +154,8 @@ See the source file for author and licensing information.
 % First, the exact syntax of |\directlua| has changed along version of
 % Lua\TeX, so this package provides a |\luadirect| command which is an exact
 % synonym of |\directlua| except that it doesn't have the funny, changing
-% parts of its syntax.\footnote{And expands in two steps instead of one. If
+% parts of its syntax, and benefits from the debugging facilities described
+% below (\ref{dbg}).\footnote{And expands in two steps instead of one. If
 % you don't know what it means, then you hopefully don't need to.}
 %
 % The problems with |\directlua| (or |\luadirect|) are mainly with \TeX\
@@ -254,6 +255,15 @@ See the source file for author and licensing information.
 % expansion, and |\luastringO| for one-level expansion (of the first token)
 % only.
 %
+% \subsection{Debugging} \label{dbg}
+%
+% \DescribeMacro\LuaCodeDebugOn
+% \DescribeMacro\LuaCodeDebugOff
+% The commands |\luadirect| and |\luaexec| as well as the environments
+% |luacode| and |luacode*| can optionally print the Lua code as it will be
+% seen by the Lua interpreter in the log file before executing it. The feature
+% is disabled by default and can be turned on and off using |\LuaCodeDebugOn|
+% and |\LuaCodeDebugOff| (which obey the usual \TeX\ scoping rules).
 %
 %    \section{Implementation}
 %
