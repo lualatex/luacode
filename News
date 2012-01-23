@@ -1,3 +1,7 @@
+2012/01/23 v1.2a
+    * fix spurious space
+    * clarify doc about backslashes and Lua strings (sugg. by Herbert)
+
 2011/12/29 v1.2
     * new helper macros \luastring, \luastringO, \luastringN
     * new debug (logging) feature
