@@ -169,10 +169,9 @@ See the source file for author and licensing information.
 % \DescribeMacro\luaexec
 % The |\luaexec| command is similar to |\luadirect| but with a few additional
 % features:\footnote{And one major drawback: it is not purely expandable. See
-% previous note.} |\\| gives a double backslash (convenient in Lua strings),
-% |\%| a percent character, and |~| just works. If you happen to need a single
-% backslash, you can still use a construct like |\string\n| just as with
-% |\luadirect|. Also, \TeX\ macros are expanded.
+% previous note.} |\\| gives a double backslash (see note below)
+% |\%| a percent character, and |~| just works. For single backslashes,
+% |\string| is still needed.  Also, \TeX\ macros are expanded.
 %
 % \DescribeEnv{luacode}
 % The |luacode| environment is similar, except that you can use |%| and other
@@ -200,7 +199,7 @@ See the source file for author and licensing information.
 %                         & |\luadirect|    & |\luaexec|      & |luacode|       & |luacode*|   \\
 %     \midrule
 %     Macros              & Yes             & Yes             & Yes             & No           \\
-%     Single backslash    & Using |\string| & Using |\string| & Using |\string| & Just |\|     \\
+%     Single backslash    & |\string\|      & |\string\|      & |\string\|      & Just |\|     \\
 %     Double backslash    & |\string\\|     & |\\|            & |\\|            & |\\|         \\
 %     Tilde               & |\string~|      & |~|             & |~|             & |~|          \\
 %     Sharp               & |\string#|      & |\#|            & |#| (or |\#|)   & |#|          \\
@@ -211,6 +210,36 @@ See the source file for author and licensing information.
 %   \end{tabular}
 % \end{center}
 %
+% \noindent\textbf{Backslashes and Lua strings.}
+% In the table and descriptions above, ``double backslash'' means that the Lua
+% interpreter will see a double backslash. It may then turn it into a single
+% backslash in the context of a Lua string delimited by single or double quotes
+% as opposed to a Lua string delimited by brackets, see
+% \href{http://www.lua.org/pil/2.4.html}{\emph{Programming in Lua} section
+% 2.4}. Similarly, a single backslash may or may not be interpreted as
+% starting an escape sequence. For example:
+% \begin{verbatim}
+% \begin{luacode}
+% a = "\\"      -- a contains a single backslash
+% b = [[\\]]    -- b contains two backslashes
+% c = "\\\\"    -- c contains two backslashes too
+% d = "line one\nline two"  -- d contains a newline character
+% e = [[single\nline]]      -- e contains no newline character
+% \end{luacode}
+% \end{verbatim}
+% The alert reader may notice that in the case of |\luadirect| and |\luaexec|,
+% single backslashes are a bit weird. For example with
+% \begin{verbatim}
+% \luaexec{texio.write_nl("line one\string\nline two")}
+% \end{verbatim}
+% \TeX\ will see |\nline| as a control sequence which is the ``argument'' of
+% |\string| and the Lua interpreter will consider only |\n| as an escape
+% sequence, and |line| as independent characters. In practice, this should not
+% have any unwanted consequences (except perhaps on the sanity of the reader).
+%
+% \medskip
+%
+% \noindent\textbf{Technical notes on environments.}
 % \DescribeEnv{luacodestar}
 % Note that you cannot use the environments inside the argument of a command
 % (just as with verbatim commands and environments).  If you wish to define
