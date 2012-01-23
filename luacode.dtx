@@ -556,6 +556,9 @@ See the source file for author and licensing information.
 %
 %    \section{Test file} \label{test}
 %
+%    TODO: this test files requires manual checking that the output (pdf and
+%    log file) is correct; this should be fixed.
+%
 %    \begin{macrocode}
 %<*testlatex>
 \documentclass{minimal}
@@ -656,6 +659,23 @@ stringN: \texttt{\luadirect{myfunc(\luastringN\mac)}}\par
 
 \LuaCodeDebugOff
 \luadirect{local rem = 'dbg should be disabled here'}
+
+%    \end{macrocode}
+%
+%    Now track spurious spaces. This is the only part that is automatically
+%    checked, using grep in the Makefile.
+%
+%    \begin{macrocode}
+\tracingcommands1
+\luadirect{local foo}%
+\luaexec{local foo}%
+\begin{luacode}
+  local foo
+\end{luacode}
+\begin{luacode*}
+  local foo
+\end{luacode*}
+\tracingcommands0
 
 \end{document}
 %</testlatex>

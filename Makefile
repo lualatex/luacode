@@ -5,6 +5,7 @@ DTX       = $(NAME).dtx
 DOC       = $(NAME).pdf
 STY       = $(NAME).sty
 TEST      = test-$(NAME).tex
+TESTLOG   = test-$(NAME).log
 
 UNPACKED  = $(STY) $(TEST)
 GENERATED = $(UNPACKED) $(DOC)
@@ -41,6 +42,7 @@ $(UNPACKED): $(DTX)
 
 check: $(UNPACKED)
 	lualatex -interaction=batchmode $(TEST) >/dev/null
+	! grep 'blank space' $(TESTLOG)
 
 $(CTAN_ZIP): $(DOC) $(SOURCES) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
