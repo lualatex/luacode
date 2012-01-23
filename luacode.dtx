@@ -133,7 +133,8 @@ See the source file for author and licensing information.
 % tricky: there is no easy way to use the percent character, counting
 % backslashes may be hard, and Lua comments don't work the way you expect.
 % This package provides the |\luaexec| command and the |luacode(*)|
-% environments to help with these problems.
+% environments to help with these problems, as well as helper macros and a
+% debugging mode.
 % \end{abstract}
 %
 % \tableofcontents
@@ -161,10 +162,10 @@ See the source file for author and licensing information.
 % The problems with |\directlua| (or |\luadirect|) are mainly with \TeX\
 % special characters. Actually, things are not that bad, since most special
 % characters do work, namely: |_|, |^|, |&|, \verb+$+, |{|, |}|. Three are a
-% bit tricky but they can be managed with |\string|: |\| and |~|. Only |%| is
-% really hard to obtain. Also, \TeX\ macros are expanded, which is good since
-% it allows to pass information from \TeX\ to Lua, but you must be careful
-% and use only purely expandable macros.
+% bit tricky but they can be managed with |\string|: |\|, |#| and |~|. Only
+% |%| is really hard to obtain. Also, \TeX\ macros are expanded, which is good
+% since it allows to pass information from \TeX\ to Lua, but you must be
+% careful and use only purely expandable macros.
 %
 % \DescribeMacro\luaexec
 % The |\luaexec| command is similar to |\luadirect| but with a few additional
@@ -174,19 +175,21 @@ See the source file for author and licensing information.
 % |\string| is still needed.  Also, \TeX\ macros are expanded.
 %
 % \DescribeEnv{luacode}
-% The |luacode| environment is similar, except that you can use |%| and other
-% special characters directly (but |\%| also works). Only the backslash and
-% the braces keep their special meaning, so that macros still work as usual,
-% and you still need to use a |\string| trick to get a single backslash.
-% Technical note: you are supposed to leave a space (or end-of-line) after
-% the |\begin{luacode}|, which is probably a natural thing to do anyway.
+% The |luacode| environment is similar to |\luaexec|, except that you can now
+% use |%| and |#| directly (but |\%| and |\#| also work) and the line breaks
+% are respected, so that you can use line-wise Lua comments in the normal way,
+% without mistakenly commenting the rest of the chunk.
+%
+% Only the backslash and the braces keep their special meaning, so that macros
+% still work as usual, and you still need to use |\string| to get a single
+% backslash.
 %
 % \DescribeEnv{luacode*}
-% A variant |luacode*| goes further and makes even backslash a normal
+% The variant |luacode*| goes further and makes even backslash a normal
 % character, so that you don't need any trick to obtain a single backslash. On
-% the other end, macros don't work any more.  In addition, the line breaks in
-% the environments are respected, so that you can use line-wise Lua comments
-% in the normal way, without mistakenly commenting the rest of the chunk.
+% the other end, macros don't work any more. So, the content of a |luacode*|
+% is interpreted exactly as if it were in a normal Lua file, directly fed to
+% the Lua interpreter without any \TeX\ intervention.
 %
 % \medskip
 %
@@ -241,11 +244,16 @@ See the source file for author and licensing information.
 %
 % \noindent\textbf{Technical notes on environments.}
 % \DescribeEnv{luacodestar}
-% Note that you cannot use the environments inside the argument of a command
-% (just as with verbatim commands and environments).  If you wish to define
-% derived environments, you'll need to use |\luacode| \dots |\endluacode|
-% instead of the usual |\begin| |\end| pair in your environment's definition.
-% For the stared variant, use |\luacodestar| and |\endluacodestar|.
+% The environments will not work inside the argument of a command (just as
+% with verbatim commands and environments).  Also, you are supposed to leave a
+% space (or end-of-line) after the |\begin{luacode}| or |\begin{luacode*}|,
+% which is probably a natural thing to do anyway.  Finally, if you wish to
+% define derived environments, you'll need to use |\luacode| \dots
+% |\endluacode| instead of the usual |\begin| |\end| pair in your
+% environment's definition.  For the stared variant, use |\luacodestar| and
+% |\endluacodestar|.
+%
+% \medskip
 %
 % The test file (section~\ref{test}, or \file{test-luacode.tex} in the same
 % directory as this document) provides stupid but complete examples.
